@@ -1,13 +1,22 @@
-from bs4 import BeautifulSoup
 import requests
-from request import get_result
+from request import get_pmid, get_abstract, preprocess
+from flask import Flask
+from flask import request, render_template
 
-# url = 'https://en.wikipedia.org/wiki/Springer_Science%2BBusiness_Media'
 
-# response = requests.get(url)
+app = Flask(__name__)
 
-# soup = BeautifulSoup(response.text, "html.parser")
-# print(soup.get_text())
-# print(soup.prettify())
+@app.route("/", methods=["GET", "POST"])
+@app.route('/<name>')
+def result():
+        if request.method == "POST":
+            user_input = request.form["user_input"]
+            dataframe=get_abstract(get_pmid(user_input))
+            processed = preprocess(dataframe)
+            return render_template('dataframe.html', dataframe = processed )
 
-get_result()
+        else: 
+            return render_template("home.html")
+       
+if __name__ == "__main__":
+    app.run()
