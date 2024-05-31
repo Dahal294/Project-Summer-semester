@@ -3,16 +3,18 @@ import json
 import xml.etree.ElementTree as ET
 import re
 import pandas as pd
-from bs4 import BeautifulSoup
 import string
-string.punctuation
 import nltk
+
+from bs4 import BeautifulSoup
 from nltk.stem.porter import PorterStemmer
 from nltk.stem import WordNetLemmatizer
+
+string.punctuation
 nltk.download('stopwords')
 nltk.download('wordnet')
 
-retmax = 5
+retmax = 50
 base_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
 stopwords = nltk.corpus.stopwords.words('english')
 porter_stemmer = PorterStemmer()
@@ -39,7 +41,7 @@ def get_abstract(df):
             tags = soup.find_all("p")[3:8]
             pgh =''
             for p in tags: 
-                pgh += p.text 
+                pgh += " " + p.text 
             abstracts.append(pgh)
     df["abstracts"] = abstracts
     return df 
@@ -76,14 +78,13 @@ def remove_non_alpha(text):
 def preprocess(df):
 #storing the puntuation free text
     df['clean_msg']= df['abstracts'].apply(lambda x:remove_punctuation(x))
-    df['msg_lower']= df['clean_msg'].apply(lambda x: x.lower())
-    df['non_alpha'] = df["msg_lower"].apply(lambda x:remove_non_alpha(x))
-    df['msg_tokenied']= df['non_alpha'].apply(lambda x: tokenization(x))
-    df['no_stopwords']= df['msg_tokenied'].apply(lambda x:remove_stopwords(x))
-    df['msg_stemmed']=df['no_stopwords'].apply(lambda x: stemming(x))
-    df['msg_lemmatized']=df['msg_stemmed'].apply(lambda x:lemmatizer(x))
-    
-
+    df['clean_msg']= df['clean_msg'].apply(lambda x: x.lower())
+    df['clean_msg'] = df["clean_msg"].apply(lambda x:remove_non_alpha(x))
+    df['clean_msg']= df['clean_msg'].apply(lambda x: tokenization(x))
+    df['clean_msg']= df['clean_msg'].apply(lambda x:remove_stopwords(x))
+    df['clean_msg']=df['clean_msg'].apply(lambda x: stemming(x))
+    df['clean_msg']=df['clean_msg'].apply(lambda x:lemmatizer(x))
+    df['clean_msg'] = df['clean_msg'].apply(lambda x: " ".join(x))
     return df
 
 
