@@ -14,7 +14,7 @@ string.punctuation
 nltk.download('stopwords')
 nltk.download('wordnet')
 
-retmax = 50
+retmax = 200
 base_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
 stopwords = nltk.corpus.stopwords.words('english')
 porter_stemmer = PorterStemmer()
@@ -47,45 +47,61 @@ def get_abstract(df):
     return df 
 
 
-def remove_punctuation(text):
-        punctuationfree="".join([i for i in text if i not in string.punctuation])
-        return punctuationfree
+def get_topics(df):
+    topics = []
+    for row in df.iloc[:, 0]:
+        response = requests.get(row)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.content, "html.parser")
+            h1_tag = soup.find("h1")
+            if h1_tag:
+                topics.append(h1_tag.text)
+            else:
+                topics.append("No topic found")
+        else:
+            topics.append("Failed to retrieve")
+    df["topics"] = topics
 
 
-def tokenization(text):
-    tokens = re.split('\W+',text)
-    return tokens
+# def remove_punctuation(text):
+#         punctuationfree="".join([i for i in text if i not in string.punctuation])
+#         return punctuationfree
 
 
-def remove_stopwords(text):
-    output= [i for i in text if i not in stopwords]
-    return output
-
-def stemming(text):
-    stem_text = [porter_stemmer.stem(word) for word in text]
-    return stem_text
+# def tokenization(text):
+#     tokens = re.split('\W+',text)
+#     return tokens
 
 
-def lemmatizer(text):
-    lemm_text = [wordnet_lemmatizer.lemmatize(word) for word in text]
-    return lemm_text
+# def remove_stopwords(text):
+#     output= [i for i in text if i not in stopwords]
+#     return output
 
-def remove_non_alpha(text):
-    # Remove non-alphabetic characters
-    text = re.sub(r'[^a-zA-Z\s]', '', text)
-    return text
+# def stemming(text):
+#     stem_text = [porter_stemmer.stem(word) for word in text]
+#     return stem_text
 
-def preprocess(df):
-#storing the puntuation free text
-    df['clean_msg']= df['abstracts'].apply(lambda x:remove_punctuation(x))
-    df['clean_msg']= df['clean_msg'].apply(lambda x: x.lower())
-    df['clean_msg'] = df["clean_msg"].apply(lambda x:remove_non_alpha(x))
-    df['clean_msg']= df['clean_msg'].apply(lambda x: tokenization(x))
-    df['clean_msg']= df['clean_msg'].apply(lambda x:remove_stopwords(x))
-    df['clean_msg']=df['clean_msg'].apply(lambda x: stemming(x))
-    df['clean_msg']=df['clean_msg'].apply(lambda x:lemmatizer(x))
-    df['clean_msg'] = df['clean_msg'].apply(lambda x: " ".join(x))
-    return df
+
+# def lemmatizer(text):
+#     lemm_text = [wordnet_lemmatizer.lemmatize(word) for word in text]
+#     return lemm_text
+
+# def remove_non_alpha(text):
+#     # Remove non-alphabetic characters
+#     text = re.sub(r'[^a-zA-Z\s]', '', text)
+#     return text
+
+# def preprocess(df):
+# #storing the puntuation free text
+#     df['clean_msg']= df['abstracts'].apply(lambda x:remove_punctuation(x))
+#     df['clean_msg']= df['clean_msg'].apply(lambda x: x.lower())
+#     df['clean_msg'] = df["clean_msg"].apply(lambda x:remove_non_alpha(x))
+#     df['clean_msg']= df['clean_msg'].apply(lambda x: tokenization(x))
+#     df['clean_msg']= df['clean_msg'].apply(lambda x:remove_stopwords(x))
+#     df['clean_msg']=df['clean_msg'].apply(lambda x: stemming(x))
+#     df['clean_msg']=df['clean_msg'].apply(lambda x:lemmatizer(x))
+#     df['clean_msg'] = df['clean_msg'].apply(lambda x: " ".join(x))
+#     return df
 
 
 

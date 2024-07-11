@@ -1,28 +1,48 @@
-import requests
-from request import get_pmid, get_abstract, preprocess
+import gensim
+from request import get_pmid, get_topics
 from flask import Flask
-from flask import request, render_template
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from cluster import BagOfWords
+from flask_cors import CORS
+from flask import request, render_template, jsonify
+from sklearn.pipeline import Pipeline
+from cluster import preprocess_document, document_to_vector
+from scipy.cluster.hierarchy import linkage, fcluster
 
 
 app = Flask(__name__)
+CORS(app)
+
+
+# ==================== loading the word2vec moel =================
+model = gensim.models.KeyedVectors.load_word2vec_format('PubMedWord2Vec.bin', binary=True)
+
+pipeline = Pipeline([
+     ("preprocess", preprocess_document()), 
+     ("vectorize", document_to_vector(model))
+])
 
 @app.route("/", methods=["GET", "POST"])
-@app.route('/<name>')
-def result():
+
+
+
+def result(name=None):
         if request.method == "POST":
-            user_input = request.form["user_input"]
-            dataframe=get_abstract(get_pmid(user_input))
-            processed = preprocess(dataframe)
-            bow = BagOfWords(processed, "clean_msg")
-            tf_idf_df = bow.tf_idf()
-            num_clusters = 5
-            kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-            kmeans.fit(tf_idf_df)
-            processed['cluster'] = kmeans.labels_
-            return render_template('dataframe.html', dataframe = processed )
+            data = request.get_json()
+            user_input = data.get("user_input")
+            dataframe=get_topics(get_pmid(user_input))
+            document_vectors = pipeline.fit_transform(dataframe)
+            linked = linkage(document_vectors, method = 'ward')
+            num_clusters = 10
+            cluster_labels = fcluster(linked, num_clusters, criterion ='maxclust')
+            dataframe['cluster'] = cluster_labels
+            response_data = []
+            for index, row in dataframe.iterrows():
+                response_data.append({
+                    "PMID": row['PMID'],
+                    "TOPIC": row["topics"],
+                    "cluster": int(row['cluster'])
+                })
+            
+            return jsonify(response_data)
         else: 
             return render_template("home.html")
        

@@ -1,29 +1,56 @@
-import pandas as pd 
-from sklearn.feature_extraction.text import TfidfVectorizer
+import gensim
+import nltk
+import numpy as np
+import string
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from sklearn.base import BaseEstimator, TransformerMixin
+nltk.download('punkt')
+nltk.download('stopwords')
 
 
 
 
-class BagOfWords:
-    def __init__(self, dataframe, column_name):
-        self.dataframe = dataframe
-        self.column_name = column_name
-        self.vectorizer = TfidfVectorizer()
-        self.fitted = False  # Indicator to check if the vectorizer is fitted
+class preprocess_document(BaseEstimator, TransformerMixin):
 
-    def tf_idf(self):
-        series = self.dataframe[self.column_name]
-        tf_idf_matrix = self.vectorizer.fit_transform(series)
-        self.fitted = True  # Set the indicator to True after fitting
-        tf_idf_df = pd.DataFrame(tf_idf_matrix.toarray(), columns=self.vectorizer.get_feature_names_out())
-        return tf_idf_df
-
-    def tf_idf_query(self, row_number):
-        if not self.fitted:
-            raise ValueError("The TF-IDF vectorizer is not fitted. Call tf_idf() first.")
-        text = self.dataframe.loc[row_number, self.column_name]
-        tf_idf_vector = self.vectorizer.transform([text])
-        return tf_idf_vector
+    def fit(self, X, y= None):
+        return self
     
+    def transform(self, X):
+        processed_documents = []
+        for document in X[["Topic"]]:
+            tokens = word_tokenize(document)
+            tokens = [word.lower() for word in tokens]
+            tokens = [word for word in tokens if word.isalpha()]
+            stop_words = set(stopwords.words('english'))
+            tokens = [word for word in tokens if word not in stop_words]
+            processed_documents.append(tokens)
+        
+        X["tokens"] = processed_documents
+        return X
 
+
+class document_to_vector(BaseEstimator, TransformerMixin):
+
+    def __init__(self, model):
+        super().__init__
+        self.model = model
+
+    def fit(self, X, y =None):
+        return self
+    
+    def transform(self, X): 
+        document_vectors = []
+        for tokens in X["tokens"]:
+            word_vectors = []
+            for token in tokens:
+                if token in self.model:
+                    word_vectors.append(self.model[token])
+            if word_vectors: 
+                document_vector = np.mean(word_vectors, axis = 0)
+            else:
+                document_vector = np.zeros(self.model.vector_size)
+            document_vectors.append(document_vector)
+
+        return np.array(document_vectors)
 
