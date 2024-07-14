@@ -7,6 +7,7 @@ from nltk.corpus import stopwords
 from sklearn.base import BaseEstimator, TransformerMixin
 nltk.download('punkt')
 nltk.download('stopwords')
+import re
 
 
 
@@ -17,15 +18,18 @@ class preprocess_document(BaseEstimator, TransformerMixin):
         return self
     
     def transform(self, X):
+ 
         processed_documents = []
-        for document in X[["Topic"]]:
+        for document in X["topics"]:
+            document = re.sub(r'\[.*?\]', '', document)
+            document = re.sub(r'[^a-zA-Z\s]', '', document)
             tokens = word_tokenize(document)
             tokens = [word.lower() for word in tokens]
             tokens = [word for word in tokens if word.isalpha()]
             stop_words = set(stopwords.words('english'))
             tokens = [word for word in tokens if word not in stop_words]
             processed_documents.append(tokens)
-        
+    
         X["tokens"] = processed_documents
         return X
 
