@@ -15,13 +15,9 @@ CORS(app)
 
 # ==================== loading the word2vec moel =================
 
-file_path = 'PubMedWord2Vec.bin'
+
 model = api.load("glove-wiki-gigaword-300")
-# try:
-#     model = gensim.models.KeyedVectors.load_word2vec_format(file_path, binary=True)
-#     print("Model loaded successfully.")
-# except FileNotFoundError:
-#     print(f"File {file_path} not found. Please ensure the file path is correct.")
+
 pipeline = Pipeline([
      ("preprocess", preprocess_document()), 
      ("vectorize", document_to_vector(model))
