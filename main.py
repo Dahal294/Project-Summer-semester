@@ -1,3 +1,4 @@
+import matplotlib.pyplot
 import gensim
 from request import get_pmid, get_topics
 from flask import Flask
@@ -5,8 +6,11 @@ from flask_cors import CORS
 from flask import request, render_template, jsonify
 from sklearn.pipeline import Pipeline
 from cluster import preprocess_document, document_to_vector
-from scipy.cluster.hierarchy import linkage, fcluster
+import matplotlib
+matplotlib.use('Agg') 
+from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import gensim.downloader as api
+from topic import generate_topic
 
 app = Flask(__name__)
 CORS(app)
@@ -33,17 +37,33 @@ def result(name=None):
             dataframe=get_topics(get_pmid(user_input))
             document_vectors = pipeline.fit_transform(dataframe)
             linked = linkage(document_vectors, method = 'ward')
-            num_clusters = 10
+            num_clusters = 3
             cluster_labels = fcluster(linked, num_clusters, criterion ='maxclust')
             dataframe['cluster'] = cluster_labels
+            matplotlib.pyplot.figure()
+            dn = dendrogram(linked)
+            matplotlib.pyplot.savefig('output.png')
             response_data = []
+            grouped_data = dataframe.groupby("cluster")
+            topic_dict = {}
+            for cluster, group  in grouped_data:
+                 topic = generate_topic(pipeline, group)
+                 topic_dict.update({cluster: topic})
+                 print(f" cluster {cluster} topics:")
+                 print(topic)
+            print(topic_dict)
             for index, row in dataframe.iterrows():
                 response_data.append({
                     "PMID": row['PMID'],
                     "TOPIC": row["topics"],
                     "cluster": int(row['cluster'])
                 })
-            
+             
+            for row in response_data:
+                cluster_id = row['cluster']  # Get the cluster ID for each row
+                if cluster_id in topic_dict:  # Check if the topic for that cluster exists
+                    row['cluster_topic'] = topic_dict[cluster_id]  # Add the topic to the row
+
             return jsonify(response_data)
         else: 
             return render_template("home.html")

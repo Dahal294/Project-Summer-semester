@@ -14,7 +14,7 @@ string.punctuation
 nltk.download('stopwords')
 nltk.download('wordnet')
 
-retmax = 200
+retmax = 10
 base_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
 stopwords = nltk.corpus.stopwords.words('english')
 porter_stemmer = PorterStemmer()

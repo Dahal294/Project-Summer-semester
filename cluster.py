@@ -6,6 +6,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from sklearn.base import BaseEstimator, TransformerMixin
 nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('stopwords')
 import re
 
