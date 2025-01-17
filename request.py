@@ -5,6 +5,7 @@ import re
 import pandas as pd
 import string
 import nltk
+import time
 
 from bs4 import BeautifulSoup
 from nltk.stem.porter import PorterStemmer
@@ -14,7 +15,7 @@ string.punctuation
 nltk.download('stopwords')
 nltk.download('wordnet')
 
-retmax = 10
+retmax = 30
 base_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
 stopwords = nltk.corpus.stopwords.words('english')
 porter_stemmer = PorterStemmer()
@@ -27,9 +28,12 @@ def get_pmid(query, base_url = base_url, retmax = retmax):
     if response.status_code == 200:
         pmids = response.json()['esearchresult']['idlist']
     for i, pmid in enumerate(pmids): 
-        pmids[i] = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"    
-    df = pd.DataFrame(pmids, columns = ["PMID"])       
-    return df
+        pmids[i] = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" 
+    # print("---->"+str(pmids))  
+     
+    # df = pd.DataFrame(pmids, columns = ["PMID"])       
+    # return df
+    return pmids
 
 
 def get_abstract(df): 
@@ -47,21 +51,19 @@ def get_abstract(df):
     return df 
 
 
-def get_topics(df):
+def get_topics(url):
     topics = []
-    for row in df.iloc[:, 0]:
-        response = requests.get(row)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.content, "html.parser")
-            h1_tag = soup.find("h1")
-            if h1_tag:
-                topics.append(h1_tag.text)
-            else:
-                topics.append("No topic found")
+    response = requests.get(url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, "html.parser")
+        h1_tag = soup.find("h1")
+        if h1_tag:
+            topics.append(h1_tag.text)
         else:
-            topics.append("Failed to retrieve")
-    df["topics"] = topics
-    return df
+            topics.append("No topic found")
+    else:
+        topics.append("Failed to retrieve")
+    return [url, topics[0] if len(topics)>0 else topics]
 
 
 

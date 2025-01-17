@@ -11,6 +11,8 @@ matplotlib.use('Agg')
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import gensim.downloader as api
 from topic import generate_topic
+import concurrent.futures
+import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
@@ -34,10 +36,17 @@ def result(name=None):
         if request.method == "POST":
             data = request.get_json()
             user_input = data.get("user_input")
-            dataframe=get_topics(get_pmid(user_input))
+            pmid_list = get_pmid(user_input)
+            dataframe = pd.DataFrame(columns=["PMID", "topics"])
+            with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+                futures = [executor.submit(get_topics, pmid) for pmid in pmid_list]
+                for future in concurrent.futures.as_completed(futures):
+                     dataframe.loc[len(dataframe)] = future.result()
+            
+            # dataframe=get_topics(get_pmid(user_input))
             document_vectors = pipeline.fit_transform(dataframe)
             linked = linkage(document_vectors, method = 'ward')
-            num_clusters = 3
+            num_clusters = 10
             cluster_labels = fcluster(linked, num_clusters, criterion ='maxclust')
             dataframe['cluster'] = cluster_labels
             matplotlib.pyplot.figure()
@@ -49,9 +58,9 @@ def result(name=None):
             for cluster, group  in grouped_data:
                  topic = generate_topic(pipeline, group)
                  topic_dict.update({cluster: topic})
-                 print(f" cluster {cluster} topics:")
-                 print(topic)
-            print(topic_dict)
+            #      print(f" cluster {cluster} topics:")
+            #      print(topic)
+            # print(topic_dict)
             for index, row in dataframe.iterrows():
                 response_data.append({
                     "PMID": row['PMID'],
