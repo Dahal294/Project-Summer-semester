@@ -22,10 +22,8 @@ CORS(app)
 # ======================================================================================
 
 # ===================== Loading word2vec(Bio Embedding Vector) Model ===================
-model = KeyedVectors.load_word2vec_format(
-    r'D:\Project\backend\Project-Summer-semester\bio_embedding_extrinsic',
-    binary=True,
-)
+model = KeyedVectors.load_word2vec_format("models/bio_embedding_extrinsic", binary=True)
+
 # ======================================================================================
 
 # ======================== Data Pipeline for Preprocessing and Transforming ============
