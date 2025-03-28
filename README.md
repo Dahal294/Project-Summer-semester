@@ -38,9 +38,14 @@ This project also has a separate frontend repository. To integrate with the fron
 To get started, clone this repository to your local machine using the following command:
 
 ```sh
-git clone [https://github.com/your-username/your-repository-name.git](https://github.com/Dahal294/Project-Summer-semester)
+git clone https://github.com/Dahal294/Project-Summer-semester.git
 
 ```
+Navigate to the project folder:
+```sh
+cd Project-Summer-semester
+```
+
 
 ## Folder Structure
 ```
