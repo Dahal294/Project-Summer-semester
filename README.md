@@ -1,6 +1,15 @@
-# Bio Word Vector - Biomedical Word Embeddings
+# Automating Systematic Literature Review : A Clustering based Visual Approach for Efficient Knowledge Synthesis
 
-This project uses the Bio Word Vector model to improve biomedical word embeddings with subword information and MeSH ontology.
+## Overview
+This project introduces a **clustering-based visualization pipeline** to streamline the screening process in **Systematic Literature Reviews (SLRs)**. It addresses the challenges posed by the **exponential growth of research articles** and the **manual effort required** for literature screening.
+
+Using **hierarchical clustering and topic modeling**, the system automatically organizes research papers into meaningful clusters and presents them through **interactive visualizations** such as foam-trees and dendrograms. This enables researchers to explore literature efficiently and reduces the time and effort required for manual screening.
+
+## Features
+- **Automated Literature Organization**: Uses clustering techniques to group similar research papers.
+- **Interactive Visualizations**: Foam-tree and dendrogram views for better exploration.
+- **Faster Screening Process**: Reduces manual effort in literature reviews.
+- **Integration**: Can be integrated with other research tools.
 
 ## Setup
 
@@ -13,9 +22,6 @@ This project uses the Bio Word Vector model to improve biomedical word embedding
    pip install -r requirements.txt
    ```
    Or install manually:
-   ```bash
-   pip install numpy pandas scipy gensim sklearn
-   ```
 
 3. **Run the Code**  
    After setting up, run the script with:
@@ -38,8 +44,9 @@ This project also has a separate frontend repository. To integrate with the fron
 
 ---
 
-## License
-
-MIT License
+## Contributors
+- Darpan Dahal – darpan.dahal@st.ovgu.de
+- K.M. Iqbal – k.iqbal@st.ovgu.de
+- Rajesh Bhandari – rajesh.bhandari@st.ovgu.de
 
 
