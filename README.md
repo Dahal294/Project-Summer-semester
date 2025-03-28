@@ -33,6 +33,15 @@ Using **hierarchical clustering and topic modeling**, the system automatically o
 
 This project also has a separate frontend repository. To integrate with the frontend, please refer to the [https://github.com/kmiqbal19/Cluster-Visualization-FE].
 
+
+## Clone the Repository
+To get started, clone this repository to your local machine using the following command:
+
+```sh
+git clone [https://github.com/your-username/your-repository-name.git](https://github.com/Dahal294/Project-Summer-semester)
+
+```
+
 ## Folder Structure
 ```
 /your-project-folder
