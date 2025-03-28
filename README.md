@@ -21,7 +21,7 @@ Using **hierarchical clustering and topic modeling**, the system automatically o
    ```bash
    pip install -r requirements.txt
    ```
-   Or install manually:
+   Or install manually all the required dependencies. 
 
 3. **Run the Code**  
    After setting up, run the script with:
